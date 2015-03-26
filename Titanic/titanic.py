@@ -20,12 +20,12 @@ test_df = pd.read_csv('/Users/Jared/DataAnalysis/Titanic/test.csv', header=0)
 #%%
 df['Gender'] = df['Sex'].map( {'female': 0, 'male': 1} ).astype(int)
 test_df['Gender'] = test_df['Sex'].map( {'female': 0, 'male': 1} ).astype(int)
-df = df.drop(['Sex','Cabin','Ticket',
+df = df.drop(['Sex','Ticket',
               'PassengerId'], axis=1)
 
 # Collect the test data's PassengerIds before dropping it
 ids = test_df['PassengerId'].values
-test_df = test_df.drop(['Sex','Cabin','Ticket',
+test_df = test_df.drop(['Sex','Ticket',
                         'PassengerId'], axis=1)
 
 median_ages = np.zeros((2,3))
@@ -75,7 +75,7 @@ test_df.loc[test_df.AgeFill > max_middle_age,'Old'] = 1
 
 ##hist1 = df['AgeFill'].hist(bins=16, range=(0,80), alpha = .5)
 #P.show()
-
+#%%
 def getLastName(name):
     last_name = ''
     for c in name:
@@ -84,8 +84,48 @@ def getLastName(name):
         last_name += c
     return last_name
 
+def getTitle(name):
+    title = ''
+    after_comma = False
+    for c in name:
+        if (c == ' '):
+            continue
+        if(not after_comma):
+            if(c ==','):
+                after_comma = True
+            continue
+        else:
+            if(c =='.'):
+                break
+            title += c
+    return title
+
 #maybe add male/female surviving family as well
 #df['MaleFamSurv'] =
+#%%
+#Ports = list(enumerate(np.unique(train_df['Embarked'])))    # determine all values of Embarked,
+#Ports_dict = { name : i for i, name in Ports }              # set up a dictionary in the form  Ports : index
+#train_df.Embarked = train_df.Embarked.map( lambda x: Ports_dict[x]).astype(int)     # Convert all Embark strings to int
+
+
+df['Title'] = df.Name.map(lambda x: getTitle(x))
+test_df['Title'] = test_df.Name.map(lambda x: getTitle(x))
+def getIntFromTitle(title):
+    if(title == 'Ms' or title == 'Miss'):
+        return 0
+    elif(title == 'Lady' or title == 'Mlle' or title == 'Dona' or
+         title == 'Mme' or title == 'theCountess'):
+        return 0
+    elif(title == 'Mrs'):
+        return 0
+    elif(title == 'Mr'):
+        return 1
+    elif(title == 'Master' or 'Jonkheer'):
+        return 2
+    else:
+        return 3
+df['TitleInt'] = df.Title.map(lambda x: getIntFromTitle(x)).astype(int)
+test_df['TitleInt'] = test_df.Title.map(lambda x: getIntFromTitle(x)).astype(int)
 #%%
 df['HaveFamOnShip'] = 0
 test_df['HaveFamOnShip'] = 0
@@ -105,6 +145,20 @@ if len(test_df.Embarked[ test_df.Embarked.isnull() ]) > 0:
     test_df.Embarked[ test_df.Embarked.isnull() ] = test_df.Embarked.dropna().mode().values
 
 test_df.Embarked = test_df.Embarked.map( lambda x: Ports_dict[x]).astype(int)     # Convert all Embark strings to int
+
+#%%
+df['HaveCabinInfo'] = 1
+test_df['HaveCabinInfo'] = 1
+df.loc[(df.Cabin.isnull()), 'HaveCabinInfo'] = 0
+test_df.loc[test_df.Cabin.isnull(), 'HaveCabinInfo'] = 0
+
+df['InCcabin'] = 0
+test_df['InCcabin'] = 0
+df['InCcabin'] = df[df.Cabin.isnull() != 1]['Cabin'].map(lambda x: 1 if x[0]=='C' else 0)
+df.loc[df.InCcabin.isnull(), 'InCcabin'] = 0
+test_df['InCcabin'] = test_df[test_df.Cabin.isnull() != 1]['Cabin'].map(lambda x: 1 if x[0]=='C' else 0)
+test_df.loc[test_df.InCcabin.isnull(), 'InCcabin'] = 0
+#test_df.loc[test_df.Cabin.isnull(), 'InCcabin'] = 1
 
 #%%
 #df = df.drop(['SibSp','Parch'],axis=1)
@@ -175,23 +229,27 @@ for i in range(0, len(test_df['Name'])):
     test_df['MaleFamSurv'][i] = surviving_male_family
 #toc=timeit.default_timer()
 #print('Time',toc - tic)
+    
+#%%
+    
+
 #%%
 #df = df.drop(['Name','Fare'],axis=1)
 #test_df = test_df.drop(['Name','Fare'],axis=1)
-df = df.drop(['Name'],axis=1)
-test_df = test_df.drop(['Name'],axis=1)
+#df = df.drop(['Name'],axis=1)
+#test_df = test_df.drop(['Name'],axis=1)
 #%%
-df['HighFare'] = 0
-fare_level = 45
-df.loc[(df.Fare > 45), 'HighFare'] = 1
-test_df['HighFare'] = 0
-test_df.loc[(df.Fare > 45), 'HighFare'] = 1
-
-df['LowFare'] = 0
-low_fare_level = 9
-df.loc[((df.Fare <= low_fare_level) & (df.Fare > 0) ) , 'LowFare'] = 1
-test_df['LowFare'] = 0
-test_df.loc[((test_df.Fare <= low_fare_level) & (test_df.Fare > 0) ) , 'LowFare'] = 1
+#df['HighFare'] = 0
+#fare_level = 45
+#df.loc[(df.Fare > 45), 'HighFare'] = 1
+#test_df['HighFare'] = 0
+#test_df.loc[(test_df.Fare > 45), 'HighFare'] = 1
+#
+#df['LowFare'] = 0
+#low_fare_level = 9
+#df.loc[((df.Fare <= low_fare_level) & (df.Fare > 0) ) , 'LowFare'] = 1
+#test_df['LowFare'] = 0
+#test_df.loc[((test_df.Fare <= low_fare_level) & (test_df.Fare > 0) ) , 'LowFare'] = 1
 #%%
 p.scatter(df['FamSurv'],df['Survived'],alpha=0.1)
 p.savefig('Images/scatter.png', bbox_inches='tight')
@@ -228,30 +286,26 @@ p.savefig('Images/test_fam_surv.png', bbox_inches='tight')
 # The data is now ready to go. 
 #So lets fit to the train, then predict to the test!
 # Convert back to a numpy array
-#train_data = df[df.index > 200].values
-#test_data_hidden = test_df.values
-#test_data = df[df.index <= 200].values
-#train_data = df.drop(['MaleFamSurv','AgeIsNull',
-#                      'AgeFill', 'Young', 'MiddleAged', 'Old'],
-#                     axis=1)[df.index > 200].values
-#test_data_hidden = test_df.drop(['MaleFamSurv','AgeIsNull',
-#                                 'AgeFill', 'Young', 'MiddleAged', 'Old'],
-#                                axis=1).values
-#test_data = df.drop(['MaleFamSurv', 'AgeIsNull',
-#                     'AgeFill', 'Young', 'MiddleAged', 'Old'],axis=1).values
-train_data = df.drop(['MaleFamSurv','AgeIsNull', 'Parch', 'SibSp', 'Fare', 'HighFare','Embarked', 'LowFare',
-                      'HaveFamOnShip', 'AgeFill', 'MiddleAged', 'Old'],
-                     axis=1)[df.index > -1].values
-test_data_hidden = test_df.drop(['MaleFamSurv', 'AgeIsNull', 'Parch', 'SibSp', 'Fare', 'LowFare',
-                                 'Embarked','HaveFamOnShip', 'HighFare', 'AgeFill', 'MiddleAged', 'Old'],
-                                axis=1).values
-test_data = df.drop(['MaleFamSurv', 'AgeIsNull', 'Parch', 'SibSp', 'Fare', 'Embarked', 'LowFare',
-                     'HighFare', 'HaveFamOnShip', 'AgeFill', 'MiddleAged', 'Old'],
-                     axis=1)[df.index <= 200].values
+
+train_data_df = df.drop(['MaleFamSurv','AgeIsNull', 'Parch', 'SibSp', 'Fare',
+                      'Embarked','HaveFamOnShip',
+                      'AgeFill', 'MiddleAged', 'Old','Cabin', 'HaveCabinInfo',
+                      'InCcabin', 'Title','Name'],
+                      axis = 1)
+test_data_hidden_df = test_df.drop(['MaleFamSurv', 'AgeIsNull', 'Parch', 'SibSp',
+                                 'Fare','HaveCabinInfo','InCcabin',
+                                 'Embarked','HaveFamOnShip', 
+                                 'AgeFill', 'MiddleAged', 'Old','Cabin',
+                                 'Title','Name'],
+                                axis=1)                 
+
+train_data = train_data_df[train_data_df.index > -1].values
+test_data_hidden = test_data_hidden_df.values
+test_data = train_data_df[train_data_df.index <= 200].values
 
 tic=timeit.default_timer()
 print ('Training...')
-forest = RandomForestClassifier(n_estimators=10000, random_state=1)
+forest = RandomForestClassifier(n_estimators=5000, random_state=1)
 #forest = forest.fit( train_data[0::,1::], train_data[0::,0] )
 forest = forest.fit( train_data[0::,1::], train_data[0::,0] )
 
