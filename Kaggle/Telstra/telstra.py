@@ -522,8 +522,6 @@ combined = pd.merge(combined,resource_type_min[['id','min_resource_type']],left_
 combined = pd.merge(combined,resource_type_median[['id','median_resource_type']],left_on = ['id'],
                                right_on = ['id'],how='left')
 
-combined['range_log_features_volume'] = combined['max_log_features_volume'] - combined['min_locations_per_feature']
-
 combined = pd.merge(combined,log_feature_no_dups_combined[
                     ['id',
                       'location_by_unique_features',
@@ -570,7 +568,6 @@ tic=timeit.default_timer()
 combined['location_number'] = combined['location'].map(lambda x: x[9:]).astype(int)
 
 combined.sort(['median_log_feature','min_log_feature'],inplace=True)
-
 combined_temp = combined.copy()
 log_feature_cols_all = [col for col in list(combined) if col.startswith('log_feature_')]
 
@@ -631,22 +628,8 @@ if (is_sub_run):
     train = combined.loc[combined['fault_severity'] != 'dummy' ]
     test = combined.loc[combined['fault_severity'] == 'dummy' ]
 else:
-    train = combined.loc[(combined['fault_severity'] != 'dummy') &
-                         (combined['id'] > 5000)]
-    test = combined.loc[(combined['fault_severity'] != 'dummy') &
-                         (combined['id'] <= 5000)]
-#    train = combined.loc[(combined['fault_severity'] != 'dummy') &
-#                         ((combined['id'] > 10000) | (combined['id'] <= 5000))]
-#    test = combined.loc[(combined['fault_severity'] != 'dummy') &
-#                         (combined['id'] > 5000) & (combined['id'] <= 10000)]
-#    train = combined.loc[(combined['fault_severity'] != 'dummy') &
-#                         ((combined['id'] > 15000) | (combined['id'] <= 10000))]
-#    test = combined.loc[(combined['fault_severity'] != 'dummy') &
-#                         (combined['id'] > 10000) & (combined['id'] <= 15000)]
-#    train = combined.loc[(combined['fault_severity'] != 'dummy') &
-#                         (combined['id'] < 15000)]
-#    test = combined.loc[(combined['fault_severity'] != 'dummy') &
-#                         (combined['id'] >= 15000)]
+    train = combined.loc[(combined['fault_severity'] != 'dummy') & (combined['id'] > 5000)]
+    test = combined.loc[(combined['fault_severity'] != 'dummy') & (combined['id'] <= 5000)]
 #%%
 def fit_xgb_model(train, test, params, xgb_features, num_rounds = 10, num_boost_rounds = 10,
                   do_grid_search = False, use_early_stopping = True, print_feature_imp = False,
