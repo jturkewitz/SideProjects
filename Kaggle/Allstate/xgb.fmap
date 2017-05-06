@@ -1,0 +1,14 @@
+0	pred_xgb_1	q
+1	pred_xgb_2	q
+2	pred_xgb_3	q
+3	pred_xgb_4	q
+4	pred_xgb_5	q
+5	pred_nn_1	q
+6	pred_nn_2	q
+7	pred_nn_3	q
+8	pred_nn_4	q
+9	max_pred	q
+10	min_pred	q
+11	std_pred	q
+12	sum_pred	q
+13	range_pred	q
